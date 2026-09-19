@@ -12,8 +12,8 @@
   <main class="wrap">
     <nav class="steps" aria-label="進行">
       <button data-go="1">1 相談入口</button>
-      <button data-go="2">2 背景確認</button>
-      <button data-go="3">3 場面差・強み</button>
+      <button data-go="2">2 指導テーマ</button>
+      <button data-go="3">3 詳細確認</button>
       <button data-go="4">4 支援仮説</button>
       <button data-go="5">5 試行・再評価</button>
     </nav>
@@ -89,31 +89,40 @@
         </div>
       </section>
 
-      <section class="panel step" data-step="2" hidden>
-        <h2>2 背景確認</h2>
-        <p class="hint">診断名はモデル決定の主因にせず、質問の仕方や提示方法を調整する補助情報として扱います。</p>
-        <div class="grid2">
+      <section class="panel step theme-step" data-step="2" hidden>
+        <div class="section-title-row">
+          <h2>2 指導テーマと使用教材</h2>
+          <span class="section-note">相談入口から、まず2つの方向を仮置きします</span>
+        </div>
+        <p class="hint compact-hint">ここでは確定しません。2つのテーマを並べて見て、次の「詳細確認」で見立てを修正します。</p>
+        <div id="themeCards" class="theme-grid" aria-live="polite"></div>
+        <div class="theme-actions">
+          <button type="button" class="primary" id="refreshThemes">相談入口から2テーマを整理</button>
+        </div>
+      </section>
+
+      <section class="panel step" data-step="3" hidden>
+        <h2>3 詳細確認</h2>
+        <p class="hint">2つのテーマを確かめるため、背景・場面差・強みを追加で確認します。診断名は補助情報として扱います。</p>
+        <div class="grid2 detail-background">
           <label>診断・特性（任意）
             <select name="trait">
               <option value="">未選択</option><option>ASD</option><option>ADHD</option><option>LD・SLD</option><option>知的発達</option><option>情緒面</option><option>未診断・傾向</option><option>その他</option>
             </select>
-          </label>
-          <label>認知・言語面
-            <textarea name="cognition" rows="3" placeholder="例：抽象語の理解は難しいが、図示すると分かりやすい"></textarea>
-          </label>
-          <label>興味・関心
-            <textarea name="interests" rows="3" placeholder="例：ゲーム、漫画、運動、制作"></textarea>
           </label>
           <label>主な困難場面
             <select name="mainContext">
               <option value="">未選択</option><option>通常級</option><option>休み時間</option><option>家庭</option><option>通級</option><option>小集団</option><option>複数場面</option>
             </select>
           </label>
+          <label>認知・言語面
+            <textarea name="cognition" rows="2" placeholder="例：図示すると分かりやすい"></textarea>
+          </label>
+          <label>興味・関心
+            <textarea name="interests" rows="2" placeholder="例：ゲーム、漫画、運動、制作"></textarea>
+          </label>
         </div>
-      </section>
-
-      <section class="panel step" data-step="3" hidden>
-        <h2>3 場面差・強み</h2>
+        <div class="detail-divider"></div>
         <div class="grid2">
           <label>中心課題
             <select name="domain" id="domainSelect">
