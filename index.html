@@ -7,14 +7,7 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header class="hero">
-    <div class="wrap">
-      <p class="eyebrow">学校向け・支援の意思決定</p>
-      <h1>モデル分類型支援</h1>
-      <p class="lead">相談から仮説を立て、試して見直す。児童を固定的に分類せず、現在の課題状態を整理するための補助ツールです。</p>
-      <div class="notice">公開版では実在児童を特定できる情報を入力しないでください。記録はこの端末のブラウザ内にのみ保存されます。</div>
-    </div>
-  </header>
+  <div class="app-title wrap">モデル分類型支援</div>
 
   <main class="wrap">
     <nav class="steps" aria-label="進行">
@@ -26,66 +19,73 @@
     </nav>
 
     <form id="supportForm" autocomplete="off">
-      <section class="panel step" data-step="1">
-        <h2>1 相談入口・関係確認</h2>
-        <p class="hint">本人・学校・家庭の声を分けて扱います。誰の困りなのかを混ぜないことが重要です。</p>
-
-        <label>学年
-          <select name="grade">
-            <option value="">選択してください</option>
-            <option>小学1年</option><option>小学2年</option><option>小学3年</option>
-            <option>小学4年</option><option>小学5年</option><option>小学6年</option>
-          </select>
-        </label>
-
-        <div class="grid3">
-          <fieldset>
-            <legend>本人の困り感</legend>
-            <label>確認状況
-              <select name="studentStatus"><option>未確認</option><option>確認した</option></select>
-            </label>
-            <label>主な困り
-              <select name="studentConcern">
-                <option value="">未選択</option><option>不登校／登校しぶり</option><option>学習</option><option>対人関係</option><option>生活習慣</option><option>情緒</option><option>行動</option><option>その他</option>
-              </select>
-            </label>
-            <label>具体的な声<textarea name="studentVoice" rows="4"></textarea></label>
-          </fieldset>
-
-          <fieldset>
-            <legend>学校・担任の困り感</legend>
-            <label>確認状況
-              <select name="schoolStatus"><option>未確認</option><option>確認した</option></select>
-            </label>
-            <label>主な困り
-              <select name="schoolConcern">
-                <option value="">未選択</option><option>不登校／登校しぶり</option><option>学習</option><option>対人関係</option><option>生活習慣</option><option>情緒</option><option>行動</option><option>その他</option>
-              </select>
-            </label>
-            <label>具体的な声<textarea name="schoolVoice" rows="4"></textarea></label>
-          </fieldset>
-
-          <fieldset>
-            <legend>家庭・保護者の困り感</legend>
-            <label>確認状況
-              <select name="homeStatus"><option>未確認</option><option>確認した</option></select>
-            </label>
-            <label>主な困り
-              <select name="homeConcern">
-                <option value="">未選択</option><option>不登校／登校しぶり</option><option>学習</option><option>対人関係</option><option>生活習慣</option><option>情緒</option><option>行動</option><option>その他</option>
-              </select>
-            </label>
-            <label>具体的な声<textarea name="homeVoice" rows="4"></textarea></label>
-          </fieldset>
+      <section class="panel step compact-entry" data-step="1">
+        <div class="section-title-row">
+          <h2>1 相談入口・関係確認</h2>
+          <span class="section-note">本人・学校・家庭の声を分けて確認</span>
         </div>
 
-        <div class="grid2">
+        <div class="entry-top">
+          <label>学年
+            <select name="grade">
+              <option value="">選択してください</option>
+              <option>小学1年</option><option>小学2年</option><option>小学3年</option>
+              <option>小学4年</option><option>小学5年</option><option>小学6年</option>
+            </select>
+          </label>
           <label>家族との関係
             <select name="familyRelation"><option>未確認</option><option>良好</option><option>気になる点がある</option></select>
           </label>
           <label>担任との関係
             <select name="teacherRelation"><option>未確認</option><option>良好</option><option>気になる点がある</option></select>
           </label>
+        </div>
+
+        <div class="grid3 concern-grid">
+          <fieldset>
+            <legend>本人</legend>
+            <div class="compact-fields">
+              <label>確認
+                <select name="studentStatus"><option>未確認</option><option>確認した</option></select>
+              </label>
+              <label>主な困り
+                <select name="studentConcern">
+                  <option value="">未選択</option><option>不登校／登校しぶり</option><option>学習</option><option>対人関係</option><option>生活習慣</option><option>情緒</option><option>行動</option><option>その他</option>
+                </select>
+              </label>
+            </div>
+            <label>具体的な声<textarea name="studentVoice" rows="2"></textarea></label>
+          </fieldset>
+
+          <fieldset>
+            <legend>学校・担任</legend>
+            <div class="compact-fields">
+              <label>確認
+                <select name="schoolStatus"><option>未確認</option><option>確認した</option></select>
+              </label>
+              <label>主な困り
+                <select name="schoolConcern">
+                  <option value="">未選択</option><option>不登校／登校しぶり</option><option>学習</option><option>対人関係</option><option>生活習慣</option><option>情緒</option><option>行動</option><option>その他</option>
+                </select>
+              </label>
+            </div>
+            <label>具体的な声<textarea name="schoolVoice" rows="2"></textarea></label>
+          </fieldset>
+
+          <fieldset>
+            <legend>家庭・保護者</legend>
+            <div class="compact-fields">
+              <label>確認
+                <select name="homeStatus"><option>未確認</option><option>確認した</option></select>
+              </label>
+              <label>主な困り
+                <select name="homeConcern">
+                  <option value="">未選択</option><option>不登校／登校しぶり</option><option>学習</option><option>対人関係</option><option>生活習慣</option><option>情緒</option><option>行動</option><option>その他</option>
+                </select>
+              </label>
+            </div>
+            <label>具体的な声<textarea name="homeVoice" rows="2"></textarea></label>
+          </fieldset>
         </div>
       </section>
 
