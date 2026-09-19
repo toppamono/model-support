@@ -13,11 +13,25 @@
 - 出力は診断ではなく、観察・支援仮説・教材候補・評価の補助とする
 - 実在児童の個人情報をGitHubへ保存しない
 
-## 現在の公開版
+## 正式な最新版
 
-このリポジトリのWeb版は、ChatGPT側に残っていたテスト版と「情緒通級・個別指導 支援モデル分類 Ver.1」の設計データから再構成した公開ベースラインです。
+**GitHub の `main` ブランチを唯一の最新版として扱います。**
 
-PC上のCodexで開発している最新版と差分がある場合は、今後このリポジトリを共通の基準点として統合します。
+ChatGPT、Codex、ローカルPCのいずれで作業する場合も、作業開始前に `main` の最新状態を確認し、変更後はGitHubへ反映します。ローカルPC内だけに存在する変更は正式版とはみなしません。
+
+公開版:
+https://toppamono.github.io/model-support/
+
+リポジトリ:
+https://github.com/toppamono/model-support
+
+## 開発の役割分担
+
+- **ChatGPT**：設計、教育的妥当性、UX、仕様整理、コードレビュー、小規模修正
+- **Codex**：実装、リファクタリング、複数ファイル変更、テスト、ローカル検証
+- **GitHub**：最新版、Issue、変更履歴、レビューの基準点
+
+詳細は `docs/development-workflow.md` を参照してください。
 
 ## 構成
 
@@ -27,12 +41,9 @@ PC上のCodexで開発している最新版と差分がある場合は、今後�
 - `data/models.json` : 32支援モデル
 - `docs/concept.md` : 設計思想
 - `docs/model-structure.md` : 分類構造
+- `docs/development-workflow.md` : ChatGPT / Codex / GitHub の運用
 - `AGENTS.md` : Codex / AIエージェント向け開発原則
 
 ## 個人情報について
 
 この公開リポジトリには、実在する児童名、学校名、保護者情報、相談記録、個別指導計画などを保存しないでください。動作確認には架空ケースを使用してください。
-
-## 開発
-
-このプロジェクトは、ChatGPTで設計・レビュー、Codexで実装、GitHubで履歴管理を行う運用を想定しています。
