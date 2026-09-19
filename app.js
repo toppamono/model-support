@@ -13,6 +13,70 @@ const manifestationMap={
   "誤解する":["M17","M19"],"決められない":["M26","M23"],"気づかない":["M02","M15","M25"],"分からない":["M13","M16","M19","M30"]
 };
 
+const themeLibrary={
+  "不登校／登校しぶり":[
+    {title:"不安・見通し",goal:"不安の強さやきっかけを整理し、参加しやすい条件を探す",materials:["ヒーローワーク"]},
+    {title:"援助要請",goal:"困ったときに、誰に・いつ・どう助けを求めるかを整理する",materials:["援助要請ワーク","ヘルプカード"]}
+  ],
+  "学習":[
+    {title:"学習への取り組み",goal:"始め方・続け方・分からない時の対応を具体化する",materials:["援助要請ワーク","ヘルプカード"]},
+    {title:"注意・実行機能",goal:"注意を戻す、手順を見通す、開始するための手掛かりを探す",materials:["忍者ワーク"]}
+  ],
+  "対人関係":[
+    {title:"他者理解・社会認知",goal:"相手の気持ちや意図を一つに決めつけず、複数の見方を持つ",materials:["SST心情理解","トラブルをのりこえよう"]},
+    {title:"対人トラブル対応",goal:"事実・気持ち・選択肢を分け、対応方法を比較する",materials:["トラブルをのりこえよう"]}
+  ],
+  "生活習慣":[
+    {title:"見通し・手順",goal:"やることを分け、順番・開始・終了を見える形にする",materials:["教材候補は詳細確認後に選択"]},
+    {title:"自己管理・援助要請",goal:"自分だけで抱えず、確認や助けを使う方法を作る",materials:["援助要請ワーク","ヘルプカード"]}
+  ],
+  "情緒":[
+    {title:"感情・自己調整",goal:"感情の強さや身体のサインに気づき、落ち着く方法を選ぶ",materials:["ヒーローワーク","怒りのヨロイ攻略作戦"]},
+    {title:"ことばと気持ちの調整",goal:"強い気持ちのときの言葉や伝え方を整理する",materials:["チクチク言葉攻略作戦"]}
+  ],
+  "行動":[
+    {title:"停止・行動調整",goal:"すぐ動く前に、止まる・確認する・選ぶ流れを作る",materials:["忍者ワーク"]},
+    {title:"感情・自己調整",goal:"行動の前後にある感情や高まりに気づき、対処を選ぶ",materials:["ヒーローワーク","怒りのヨロイ攻略作戦"]}
+  ],
+  "その他":[
+    {title:"自己理解",goal:"得意・苦手、困る条件、うまくいく条件を整理する",materials:["教材候補は詳細確認後に選択"]},
+    {title:"援助要請",goal:"困りに気づき、必要な支援を選んで伝える",materials:["援助要請ワーク","ヘルプカード"]}
+  ]
+};
+
+function collectConcerns(data){
+  return [data.studentConcern,data.schoolConcern,data.homeConcern].filter(Boolean);
+}
+
+function chooseThemes(data){
+  const concerns=collectConcerns(data);
+  const first=concerns[0]||"その他";
+  const second=concerns.find(c=>c!==first)||first;
+  const a=(themeLibrary[first]||themeLibrary["その他"])[0];
+  const bSource=themeLibrary[second]||themeLibrary["その他"];
+  let b=bSource.find(x=>x.title!==a.title)||bSource[1]||themeLibrary["その他"][1];
+  return [a,b];
+}
+
+function renderThemeCards(){
+  const box=document.getElementById("themeCards");
+  if(!box) return;
+  const data=formObject();
+  const themes=chooseThemes(data);
+  const labels=["テーマA","テーマB"];
+  box.innerHTML=themes.map((t,i)=>`
+    <article class="theme-card">
+      <div class="theme-kicker">${labels[i]}</div>
+      <h3>${t.title}</h3>
+      <p class="theme-goal">${t.goal}</p>
+      <div class="material-block">
+        <div class="material-label">使用教材</div>
+        <ul>${t.materials.map(m=>`<li>${m}</li>`).join("")}</ul>
+      </div>
+    </article>
+  `).join("");
+}
+
 async function init(){
   try{
     const res=await fetch("data/models.json");
@@ -28,6 +92,7 @@ async function init(){
 
 function showStep(n){
   currentStep=Math.max(1,Math.min(5,n));
+  if(currentStep===2) renderThemeCards();
   document.querySelectorAll(".step").forEach(s=>s.hidden=Number(s.dataset.step)!==currentStep);
   document.querySelectorAll(".steps button").forEach(b=>b.classList.toggle("active",Number(b.dataset.go)===currentStep));
   stepLabel.textContent=`手順 ${currentStep} / 5`;
@@ -55,7 +120,7 @@ function modelScore(model,data){
 function generateModels(){
   const data=formObject();
   if(!data.domain){
-    modelResults.innerHTML="<p class='hint'>まず「3 場面差・強み」で中心課題を選択してください。</p>";
+    modelResults.innerHTML="<p class='hint'>まず「3 詳細確認」で中心課題を選択してください。</p>";
     return;
   }
   const ranked=models
@@ -104,6 +169,7 @@ document.getElementById("prevStep").addEventListener("click",()=>showStep(curren
 document.getElementById("nextStep").addEventListener("click",()=>showStep(currentStep+1));
 document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>showStep(Number(b.dataset.go))));
 document.getElementById("generateModels").addEventListener("click",generateModels);
+document.getElementById("refreshThemes")?.addEventListener("click",renderThemeCards);
 document.getElementById("saveLocal").addEventListener("click",saveLocal);
 document.getElementById("loadLocal").addEventListener("click",loadLocal);
 document.getElementById("clearAll").addEventListener("click",clearAll);
