@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>モデル分類型支援</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="hero">
+    <div class="wrap">
+      <p class="eyebrow">学校向け・支援の意思決定</p>
+      <h1>モデル分類型支援</h1>
+      <p class="lead">相談から仮説を立て、試して見直す。児童を固定的に分類せず、現在の課題状態を整理するための補助ツールです。</p>
+      <div class="notice">公開版では実在児童を特定できる情報を入力しないでください。記録はこの端末のブラウザ内にのみ保存されます。</div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <nav class="steps" aria-label="進行">
+      <button data-go="1">1 相談入口</button>
+      <button data-go="2">2 背景確認</button>
+      <button data-go="3">3 場面差・強み</button>
+      <button data-go="4">4 支援仮説</button>
+      <button data-go="5">5 試行・再評価</button>
+    </nav>
+
+    <form id="supportForm" autocomplete="off">
+      <section class="panel step" data-step="1">
+        <h2>1 相談入口・関係確認</h2>
+        <p class="hint">本人・学校・家庭の声を分けて扱います。誰の困りなのかを混ぜないことが重要です。</p>
+
+        <label>学年
+          <select name="grade">
+            <option value="">選択してください</option>
+            <option>小学1年</option><option>小学2年</option><option>小学3年</option>
+            <option>小学4年</option><option>小学5年</option><option>小学6年</option>
+          </select>
+        </label>
+
+        <div class="grid3">
+          <fieldset>
+            <legend>本人の困り感</legend>
+            <label>確認状況
+              <select name="studentStatus"><option>未確認</option><option>確認した</option></select>
+            </label>
+            <label>主な困り
+              <select name="studentConcern">
+                <option value="">未選択</option><option>不登校／登校しぶり</option><option>学習</option><option>対人関係</option><option>生活習慣</option><option>情緒</option><option>行動</option><option>その他</option>
+              </select>
+            </label>
+            <label>具体的な声<textarea name="studentVoice" rows="4"></textarea></label>
+          </fieldset>
+
+          <fieldset>
+            <legend>学校・担任の困り感</legend>
+            <label>確認状況
+              <select name="schoolStatus"><option>未確認</option><option>確認した</option></select>
+            </label>
+            <label>主な困り
+              <select name="schoolConcern">
+                <option value="">未選択</option><option>不登校／登校しぶり</option><option>学習</option><option>対人関係</option><option>生活習慣</option><option>情緒</option><option>行動</option><option>その他</option>
+              </select>
+            </label>
+            <label>具体的な声<textarea name="schoolVoice" rows="4"></textarea></label>
+          </fieldset>
+
+          <fieldset>
+            <legend>家庭・保護者の困り感</legend>
+            <label>確認状況
+              <select name="homeStatus"><option>未確認</option><option>確認した</option></select>
+            </label>
+            <label>主な困り
+              <select name="homeConcern">
+                <option value="">未選択</option><option>不登校／登校しぶり</option><option>学習</option><option>対人関係</option><option>生活習慣</option><option>情緒</option><option>行動</option><option>その他</option>
+              </select>
+            </label>
+            <label>具体的な声<textarea name="homeVoice" rows="4"></textarea></label>
+          </fieldset>
+        </div>
+
+        <div class="grid2">
+          <label>家族との関係
+            <select name="familyRelation"><option>未確認</option><option>良好</option><option>気になる点がある</option></select>
+          </label>
+          <label>担任との関係
+            <select name="teacherRelation"><option>未確認</option><option>良好</option><option>気になる点がある</option></select>
+          </label>
+        </div>
+      </section>
+
+      <section class="panel step" data-step="2" hidden>
+        <h2>2 背景確認</h2>
+        <p class="hint">診断名はモデル決定の主因にせず、質問の仕方や提示方法を調整する補助情報として扱います。</p>
+        <div class="grid2">
+          <label>診断・特性（任意）
+            <select name="trait">
+              <option value="">未選択</option><option>ASD</option><option>ADHD</option><option>LD・SLD</option><option>知的発達</option><option>情緒面</option><option>未診断・傾向</option><option>その他</option>
+            </select>
+          </label>
+          <label>認知・言語面
+            <textarea name="cognition" rows="3" placeholder="例：抽象語の理解は難しいが、図示すると分かりやすい"></textarea>
+          </label>
+          <label>興味・関心
+            <textarea name="interests" rows="3" placeholder="例：ゲーム、漫画、運動、制作"></textarea>
+          </label>
+          <label>主な困難場面
+            <select name="mainContext">
+              <option value="">未選択</option><option>通常級</option><option>休み時間</option><option>家庭</option><option>通級</option><option>小集団</option><option>複数場面</option>
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <section class="panel step" data-step="3" hidden>
+        <h2>3 場面差・強み</h2>
+        <div class="grid2">
+          <label>中心課題
+            <select name="domain" id="domainSelect">
+              <option value="">選択してください</option>
+            </select>
+          </label>
+          <label>頻度
+            <select name="frequency"><option value="">未選択</option><option>まれ</option><option>時々</option><option>よくある</option><option>ほぼ毎回</option></select>
+          </label>
+          <label>困難の現れ方
+            <select name="manifestation">
+              <option value="">未選択</option>
+              <option>気づかない</option><option>分からない</option><option>忘れる</option><option>誤解する</option>
+              <option>決められない</option><option>始められない</option><option>続けられない</option><option>止められない</option>
+              <option>切り替えられない</option><option>待てない</option><option>言えない</option><option>拒否</option>
+              <option>固まる</option><option>怒る</option><option>泣く</option><option>逃げる</option><option>ふざける</option>
+            </select>
+          </label>
+          <label>影響
+            <select name="impact">
+              <option value="">未選択</option><option>本人がつらい</option><option>学習が進まない</option><option>集団参加が難しい</option><option>友達関係への影響</option><option>教師との関係</option><option>自信低下</option><option>周囲の困り</option><option>安全面</option><option>大きな支障なし</option>
+            </select>
+          </label>
+        </div>
+        <label>具体的な場面・観察事実
+          <textarea name="sceneNote" rows="5" placeholder="評価語ではなく、見たこと・聞いたことを具体的に"></textarea>
+        </label>
+        <label>できている場面・強み
+          <textarea name="strengths" rows="4" placeholder="例：1対1では相談できる／予告があると切り替えやすい"></textarea>
+        </label>
+      </section>
+
+      <section class="panel step" data-step="4" hidden>
+        <h2>4 支援仮説・計画</h2>
+        <div class="grid2">
+          <label>つまずき段階
+            <select name="stage">
+              <option value="">未選択</option><option>1 知識</option><option>2 気づき</option><option>3 理解</option><option>4 判断</option><option>5 実行</option><option>6 振り返り</option><option>7 般化</option>
+            </select>
+          </label>
+          <label>支援レベル
+            <select name="supportLevel">
+              <option value="">未選択</option><option>Lv0 未経験・困難</option><option>Lv1 全面支援</option><option>Lv2 選択支援</option><option>Lv3 手掛かり支援</option><option>Lv4 自立</option><option>Lv5 般化</option>
+            </select>
+          </label>
+          <label>本人の困り感
+            <select name="awareness">
+              <option value="">未選択</option><option>困り感0 本人は困っていない</option><option>困り感1 周囲は困るが本人の認識は弱い</option><option>困り感2 漠然とした認識</option><option>困り感3 具体的に言える</option><option>困り感4 必要な支援まで自己分析できる</option>
+            </select>
+          </label>
+          <label>変化への意欲
+            <select name="motivation">
+              <option value="">未選択</option><option>意欲0 変えたいと思っていない</option><option>意欲1 教師に言われて取り組む</option><option>意欲2 少し変えたい</option><option>意欲3 自分でも変えたい</option><option>意欲4 自分から方法を探したい</option>
+            </select>
+          </label>
+        </div>
+        <button type="button" class="primary" id="generateModels">支援モデル候補を整理する</button>
+        <div id="modelResults" class="results" aria-live="polite"></div>
+        <label>今回試す支援
+          <textarea name="plan" rows="5" placeholder="候補をそのまま採用せず、実態に合わせて具体化してください"></textarea>
+        </label>
+      </section>
+
+      <section class="panel step" data-step="5" hidden>
+        <h2>5 試行・再評価</h2>
+        <div class="grid2">
+          <label>実施したこと
+            <textarea name="trial" rows="5"></textarea>
+          </label>
+          <label>観察できた変化
+            <textarea name="outcome" rows="5"></textarea>
+          </label>
+        </div>
+        <label>次に見直すこと
+          <textarea name="review" rows="4" placeholder="仮説が合わなかった可能性も残します"></textarea>
+        </label>
+
+        <div class="actions">
+          <button type="button" id="saveLocal" class="primary">この端末に保存</button>
+          <button type="button" id="loadLocal">保存記録を再開</button>
+          <button type="button" id="clearAll" class="danger">入力を初期化</button>
+        </div>
+        <p id="saveMessage" class="status"></p>
+      </section>
+
+      <div class="pager">
+        <button type="button" id="prevStep">前へ</button>
+        <span id="stepLabel">手順 1 / 5</span>
+        <button type="button" id="nextStep">次へ</button>
+      </div>
+    </form>
+  </main>
+
+  <footer class="wrap footer">
+    <p>本ツールは診断・判定を行うものではありません。支援仮説を教師が検討するための補助ツールです。</p>
+  </footer>
+  <script src="app.js"></script>
+</body>
+</html>
