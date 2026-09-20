@@ -271,8 +271,8 @@ const MATERIAL_RELATION_PROFILE={
  "きくきくドリル":{school:"guided",home:"independent"},
  "早とちりクイズ":{school:"guided",home:"independent"},
  "できる環境を探す：道具・場所・休み方":{school:"coordination",home:"optional"},
- "発達障害の子の気持ちの聞き方・伝え方":{school:"guided",home:"optional"},
- "助けを求める練習：困り・相手・伝え方":{school:"guided",home:"independent"},
+ "発達障害の子の気持ちの聞き方・伝え方":{school:"guided",home:"optional",canRedirectHelper:true},
+ "助けを求める練習：困り・相手・伝え方":{school:"guided",home:"independent",canRedirectHelper:true},
  "実行機能力ステップアップワークシート":{school:"guided",home:"optional"},
  "気持ちのワーク（1～3年）":{school:"guided",home:"optional"},
  "ヒーローワーク":{school:"independent",home:"independent"},
@@ -285,7 +285,7 @@ function relationMaterialAdjustment(m){
  let score=0;
  if(t==="不仲・緊張"){
   if(profile.school==="independent")score+=18;
-  if(profile.school==="guided")score-=8;
+  if(profile.school==="guided")score+=profile.canRedirectHelper?0:-8;
   if(profile.school==="coordination")score-=12;
  }else if(t==="良好"){
   if(profile.school==="guided"||profile.school==="coordination")score+=6;
@@ -304,7 +304,8 @@ function relationMaterialReason(m){
  const p=state.consultation.parentRelation||"未確認";
  const reasons=[];
  if(t==="不仲・緊張"&&profile.school==="independent")reasons.push("担任への依存が低い");
- if(t==="不仲・緊張"&&profile.school==="guided")reasons.push("担任との関係を踏まえ順位を抑制");
+ if(t==="不仲・緊張"&&profile.school==="guided"&&profile.canRedirectHelper)reasons.push("担任を援助先に固定せず使用");
+ if(t==="不仲・緊張"&&profile.school==="guided"&&!profile.canRedirectHelper)reasons.push("担任との関係を踏まえ順位を抑制");
  if(t==="不仲・緊張"&&profile.school==="coordination")reasons.push("学級との調整が必要なため順位を抑制");
  if(t==="良好"&&(profile.school==="guided"||profile.school==="coordination"))reasons.push("担任との連携を活かしやすい");
  if(p==="不仲・緊張"&&profile.home==="independent")reasons.push("家庭協力を前提にしない");
@@ -370,7 +371,7 @@ function relationshipGuidance(){
  const t=state.consultation.teacherRelation||"未確認";
  const p=state.consultation.parentRelation||"未確認";
  const notes=[];
- if(t==="不仲・緊張") notes.push("担任との関係に緊張があるため、担任の継続的な声掛けだけに依存せず、視覚手掛かり・自己選択・巡回教員と共有できる方法を優先する。");
+ if(t==="不仲・緊張") notes.push("担任との関係に緊張があるため、担任への援助要請や継続的な声掛けを前提にせず、信頼できる別の大人・非音声手段・視覚手掛かり・自己選択で成立する方法を優先する。");
  else if(t==="やや気になる") notes.push("担任との関係を確認しながら、学級で使う合図や支援方法は本人と合意して導入する。");
  else if(t==="良好") notes.push("担任との関係を活かし、通級で練習した方法を学級でも同じ合図で使うことを検討する。");
 
@@ -442,6 +443,39 @@ function renderPlanner(){
  $("stageSelect").value=t.stage;$("supportSelect").value=t.support;$("wishSelect").value=t.wish;$("contextNote").value=t.context;
 }
 
+function relationshipAdjustedPlan(tp,plan){
+ const t=state.consultation.teacherRelation||"未確認";
+ const p=state.consultation.parentRelation||"未確認";
+ const out={...plan,evals:[...(plan.evals||[])]};
+
+ if(t==="不仲・緊張"&&(tp.id==="T-I02"||tp.id==="T-I03")){
+  out.check="担任に頼る技能の有無ではなく、本人が安心して援助を求められる相手・方法・場所が校内にあるかを先に確認する。";
+  if(tp.id==="T-I02"){
+   out.short="困った場面で、担任に限らず、自分が安心して頼れる相手・方法・場所を選べる。";
+   out.method="援助者マップを使い、通級担当・養護教諭・専科・支援員など、本人が実際に頼りやすい相手を確認する。担任への相談は目標に固定しない。対面が難しい場合はカード、メモ、ICT、事前予約なども選択肢にする。";
+   out.evals=[
+    "本人が、安心して相談できそうな校内の相手を一人以上選んだ。",
+    "場面に応じて、相手・方法・場所を組み合わせて援助先を選んだ。",
+    "実際の困り場面で、担任以外も含む適切な援助先へ自分に合う方法でつながった。"
+   ];
+  }else{
+   out.short="困ったときに、本人が安心して使える相手・方法で援助要請を実行できる。";
+   out.method="ヘルプカード等を使う場合も『担任に出す』ことを前提にしない。通級担当・養護教諭・支援員等へのカード、机上メモ、連絡ボックス、ICT、決めた場所へ移動する合図など、本人が実行しやすい経路を作る。学級での般化は、担任との関係改善や安全な代替援助先の確保を確認してから行う。";
+   out.evals=[
+    "本人が選んだ援助先に、カード・メモ・合図などで援助要請を実行した。",
+    "対面で言いにくい場面でも、本人が選んだ非音声手段で必要な支援につながった。",
+    "学級内外で、安全な援助先を自分で選び、必要な支援へつながった。"
+   ];
+  }
+ }
+
+ if(p==="不仲・緊張"&&(tp.id==="T-I02"||tp.id==="T-I03")){
+  out.method += " 家庭での練習や保護者への援助要請は前提にせず、まず学校内で成立する援助経路を作る。";
+ }
+
+ return out;
+}
+
 function defaultPlan(tp,task,index){
  const override=PLAN_OVERRIDES[tp.id]||{};
  const stage=STAGES[task.stage]||STAGES[6],support=SUPPORTS[task.support]||SUPPORTS[3],wish=WISHES[task.wish]||WISHES[5];
@@ -456,7 +490,8 @@ function defaultPlan(tp,task,index){
   "手掛かりを使いながら、自分で対象となる行動を実行した。",
   "通常の学級や別場面で、必要な方法を自分から使った。"
  ];
- return {longGoal,short,method,context,check:override.check||"どの条件・手掛かりがあると行動が変わるかを比較して確認する。",evals:override.evals||genericEvals};
+ const plan={longGoal,short,method,context,check:override.check||"どの条件・手掛かりがあると行動が変わるかを比較して確認する。",evals:override.evals||genericEvals};
+ return relationshipAdjustedPlan(tp,plan);
 }
 
 function consultationReality(){
