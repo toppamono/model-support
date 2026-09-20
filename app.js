@@ -266,6 +266,15 @@ const MATERIALS=MATERIAL_ROWS.trim().split("\n").map((row,i)=>{
   return {id:"m"+i,name,status,topics:(topicText||"").split(",").filter(Boolean)};
 });
 
+const MATERIAL_PRIORITY={
+ "T-D02":{"忍者ワーク":40,"きくきくドリル":28,"できる環境を探す：道具・場所・休み方":22,"○○めいろ（図工）":8,"平面構成シート（図工）":6,"レンゾクゾクゾクパターンアート（図工）":5},
+ "T-C01":{"忍者ワーク":40,"早とちりクイズ":30},
+ "T-B02":{"ヒーローワーク":40,"みんなの怒りスイッチをさがせ！":30,"アンガーマネージメントカード":24,"感情を乗り越えよう":18},
+ "T-I01":{"助けを求める練習：困り・相手・伝え方":35},
+ "T-I02":{"発達障害の子の気持ちの聞き方・伝え方":35,"助けを求める練習：困り・相手・伝え方":30},
+ "T-I03":{"発達障害の子の気持ちの聞き方・伝え方":35,"助けを求める練習：困り・相手・伝え方":30}
+};
+
 const CATEGORY_SUGGESTIONS={
  "不登校／登校しぶり":["T-B03","T-B05","T-I03","T-A02"],
  "学習":["T-D02","T-D04","T-E01","T-E02","T-K03"],
@@ -389,41 +398,49 @@ function consultationReality(){
 
 function materialScore(m,tp){
  let s=0;
- if(m.topics.includes(tp.id))s+=100;
- if(m.status==="完成")s+=12;
- if(m.status==="制作中")s+=5;
- if(m.name.includes("1～3年")&&Number(state.consultation.grade)<=3)s+=8;
- if(m.name.includes("小学校6年")&&Number(state.consultation.grade)<=3)s-=5;
+ const direct=m.topics.includes(tp.id);
+ if(direct)s+=1000;
+ const priority=MATERIAL_PRIORITY[tp.id]?.[m.name]||0;
+ s+=priority;
+ if(direct&&m.status==="完成")s+=15;
+ if(direct&&m.status==="制作中")s+=6;
+ if(direct&&m.status==="活動案・未実践")s+=2;
+ if(direct&&m.name.includes("1～3年")&&Number(state.consultation.grade)<=3)s+=10;
+ if(direct&&m.name.includes("小学校6年")&&Number(state.consultation.grade)<=3)s-=10;
  return s;
 }
 function materialReason(m,tp){
  const reasons=[];
- if(m.topics.includes(tp.id))reasons.push("この課題にNotion上で対応");
+ if(m.topics.includes(tp.id))reasons.push("この課題にNotion上で直接対応");
+ const priority=MATERIAL_PRIORITY[tp.id]?.[m.name]||0;
+ if(priority>=30)reasons.push("優先候補として仮設定");
+ else if(priority>0)reasons.push("仮順位を調整中");
  if(m.status==="完成")reasons.push("完成教材");
  else if(m.status==="制作中")reasons.push("制作中");
+ else if(m.status==="活動案・未実践")reasons.push("未実践");
  if(m.name.includes("1～3年")&&Number(state.consultation.grade)<=3)reasons.push("低学年向け");
  return reasons.join("・")||"関連の確認が必要";
 }
-function candidateMaterials(tp,query=""){
+function candidateMaterials(tp,query="",directOnly=false){
  const q=query.normalize("NFKC").toLowerCase();
- return MATERIALS.map(m=>({...m,score:materialScore(m,tp)}))
-  .filter(m=>!q||(m.name+" "+m.status+" "+m.topics.join(" ")).normalize("NFKC").toLowerCase().includes(q))
+ return MATERIALS.map(m=>({...m,score:materialScore(m,tp),direct:m.topics.includes(tp.id)}))
+  .filter(m=>(!directOnly||m.direct)&&(!q||(m.name+" "+m.status+" "+m.topics.join(" ")).normalize("NFKC").toLowerCase().includes(q)))
   .sort((a,b)=>b.score-a.score||a.name.localeCompare(b.name,"ja"));
 }
 
 function renderMaterials(index,tp){
  const selected=state.selectedMaterials[index];
- const ranked=candidateMaterials(tp).filter(m=>m.score>0);
- const top=(ranked.length?ranked:candidateMaterials(tp)).slice(0,6);
+ const ranked=candidateMaterials(tp,"",true);
+ const top=ranked.slice(0,6);
  const selectedNames=MATERIALS.filter(m=>selected.includes(m.id)).map(m=>m.name);
  return `
    <div class="materials-head"><div class="block-title">教材候補 <span class="validation-tag">仮順位・要検証</span></div><span>Notion「使用教材」スナップショット</span></div>
    <div class="material-list">
-    ${top.map((m,r)=>`<div class="material-row">
+    ${top.length?top.map((m,r)=>`<div class="material-row">
       <div class="material-rank">${r+1}</div>
       <div><strong>${esc(m.name)}</strong><span class="material-meta">${esc(m.status)}</span><div class="material-reason">${esc(materialReason(m,tp))}</div></div>
       <button type="button" class="material-select ${selected.includes(m.id)?"selected":""}" data-material="${m.id}" data-task="${index}">${selected.includes(m.id)?"選択中":"使う"}</button>
-    </div>`).join("")}
+    </div>`).join(""):`<div class="check-point">この課題に直接ひもづく教材が、現在のNotionスナップショットには登録されていません。教材DB側の追加候補です。</div>`}
    </div>
    ${selectedNames.length?`<div class="selected-materials"><strong>今回使う教材：</strong> ${selectedNames.map(esc).join("／")}</div>`:""}
    <details class="material-catalogue">
