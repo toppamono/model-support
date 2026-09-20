@@ -52,9 +52,22 @@
               <option value="">未選択</option><option>ADHD</option><option>ASD</option><option>LD／SLD</option><option>複数の特性</option><option>その他</option><option>診断なし・未確認</option>
             </select>
           </label>
-          <label>担任との関係
-            <select id="teacherRelation"><option>未確認</option><option>良好</option><option>気になる点がある</option></select>
-          </label>
+          <div class="relation-pair-field">
+            <div class="relation-pair-title">担任／保護者との関係</div>
+            <div class="relation-pair-selects">
+              <label>担任
+                <select id="teacherRelation">
+                  <option>未確認</option><option>良好</option><option>やや気になる</option><option>不仲・緊張</option>
+                </select>
+              </label>
+              <label>保護者
+                <select id="parentRelation">
+                  <option>未確認</option><option>良好</option><option>やや気になる</option><option>不仲・緊張</option>
+                </select>
+              </label>
+            </div>
+            <div id="relationSummary" class="relation-summary">担任：未確認　保護者：未確認</div>
+          </div>
         </div>
         <p class="inline-principle">学年は提示方法の調整に使います。性別・診断名から課題や教材を直接決めません。</p>
 
