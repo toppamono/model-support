@@ -266,6 +266,53 @@ const MATERIALS=MATERIAL_ROWS.trim().split("\n").map((row,i)=>{
   return {id:"m"+i,name,status,topics:(topicText||"").split(",").filter(Boolean)};
 });
 
+const MATERIAL_RELATION_PROFILE={
+ "忍者ワーク":{school:"independent",home:"independent"},
+ "きくきくドリル":{school:"guided",home:"independent"},
+ "早とちりクイズ":{school:"guided",home:"independent"},
+ "できる環境を探す：道具・場所・休み方":{school:"coordination",home:"optional"},
+ "発達障害の子の気持ちの聞き方・伝え方":{school:"guided",home:"optional"},
+ "助けを求める練習：困り・相手・伝え方":{school:"guided",home:"independent"},
+ "実行機能力ステップアップワークシート":{school:"guided",home:"optional"},
+ "気持ちのワーク（1～3年）":{school:"guided",home:"optional"},
+ "ヒーローワーク":{school:"independent",home:"independent"},
+ "みんなの怒りスイッチをさがせ！":{school:"guided",home:"independent"}
+};
+function relationMaterialAdjustment(m){
+ const profile=MATERIAL_RELATION_PROFILE[m.name]||{};
+ const t=state.consultation.teacherRelation||"未確認";
+ const p=state.consultation.parentRelation||"未確認";
+ let score=0;
+ if(t==="不仲・緊張"){
+  if(profile.school==="independent")score+=18;
+  if(profile.school==="guided")score-=8;
+  if(profile.school==="coordination")score-=12;
+ }else if(t==="良好"){
+  if(profile.school==="guided"||profile.school==="coordination")score+=6;
+ }
+ if(p==="不仲・緊張"){
+  if(profile.home==="independent")score+=8;
+  if(profile.home==="optional")score-=3;
+ }else if(p==="良好"&&profile.home==="optional"){
+  score+=3;
+ }
+ return score;
+}
+function relationMaterialReason(m){
+ const profile=MATERIAL_RELATION_PROFILE[m.name]||{};
+ const t=state.consultation.teacherRelation||"未確認";
+ const p=state.consultation.parentRelation||"未確認";
+ const reasons=[];
+ if(t==="不仲・緊張"&&profile.school==="independent")reasons.push("担任への依存が低い");
+ if(t==="不仲・緊張"&&profile.school==="guided")reasons.push("担任との関係を踏まえ順位を抑制");
+ if(t==="不仲・緊張"&&profile.school==="coordination")reasons.push("学級との調整が必要なため順位を抑制");
+ if(t==="良好"&&(profile.school==="guided"||profile.school==="coordination"))reasons.push("担任との連携を活かしやすい");
+ if(p==="不仲・緊張"&&profile.home==="independent")reasons.push("家庭協力を前提にしない");
+ if(p==="不仲・緊張"&&profile.home==="optional")reasons.push("家庭依存を避けて学校内で実施");
+ if(p==="良好"&&profile.home==="optional")reasons.push("必要なら家庭共有も可能");
+ return reasons;
+}
+
 const MATERIAL_PRIORITY={
  "T-D02":{"忍者ワーク":40,"きくきくドリル":28,"できる環境を探す：道具・場所・休み方":22,"○○めいろ（図工）":8,"平面構成シート（図工）":6,"レンゾクゾクゾクパターンアート（図工）":5},
  "T-C01":{"忍者ワーク":40,"早とちりクイズ":30},
@@ -290,7 +337,7 @@ const state={
  screen:"consult",
  activeTask:0,
  consultation:{
-  grade:"",sex:"",diagnosis:"",teacherRelation:"未確認",
+  grade:"",sex:"",diagnosis:"",teacherRelation:"未確認",parentRelation:"未確認",
   studentConcern:"",studentVoice:"",schoolConcern:"",schoolVoice:"",homeConcern:"",homeVoice:""
  },
  tasks:[emptyTask(),emptyTask()],
@@ -306,7 +353,7 @@ function topic(id){return TOPICS.find(t=>t.id===id);}
 function gradeBand(){const g=Number(state.consultation.grade);return g<=2?"低":g<=4?"中":"高";}
 
 function syncConsultationFromInputs(){
- ["grade","sex","diagnosis","teacherRelation","studentConcern","studentVoice","schoolConcern","schoolVoice","homeConcern","homeVoice"].forEach(k=>{
+ ["grade","sex","diagnosis","teacherRelation","parentRelation","studentConcern","studentVoice","schoolConcern","schoolVoice","homeConcern","homeVoice"].forEach(k=>{
   state.consultation[k]=$(k).value;
  });
 }
@@ -314,11 +361,35 @@ function syncInputsFromConsultation(){
  Object.entries(state.consultation).forEach(([k,v])=>{if($(k))$(k).value=v||"";});
 }
 
+function relationLabel(value){return value||"未確認";}
+function renderRelationSummary(){
+ const el=$("relationSummary");
+ if(el)el.textContent=`担任：${relationLabel(state.consultation.teacherRelation)}　保護者：${relationLabel(state.consultation.parentRelation)}`;
+}
+function relationshipGuidance(){
+ const t=state.consultation.teacherRelation||"未確認";
+ const p=state.consultation.parentRelation||"未確認";
+ const notes=[];
+ if(t==="不仲・緊張") notes.push("担任との関係に緊張があるため、担任の継続的な声掛けだけに依存せず、視覚手掛かり・自己選択・巡回教員と共有できる方法を優先する。");
+ else if(t==="やや気になる") notes.push("担任との関係を確認しながら、学級で使う合図や支援方法は本人と合意して導入する。");
+ else if(t==="良好") notes.push("担任との関係を活かし、通級で練習した方法を学級でも同じ合図で使うことを検討する。");
+
+ if(p==="不仲・緊張") notes.push("保護者との関係に緊張があるため、家庭での反復や保護者との共同課題を前提にせず、まず学校内で完結できる支援を優先する。");
+ else if(p==="やや気になる") notes.push("家庭への依頼量を小さくし、学校で成立する方法を基本にする。");
+ else if(p==="良好") notes.push("必要に応じて、家庭でも同じ見通し・合図・記録方法を共有できる。");
+
+ return notes;
+}
+function relationshipSummaryText(){
+ return `担任：${relationLabel(state.consultation.teacherRelation)} ／ 保護者：${relationLabel(state.consultation.parentRelation)}`;
+}
+
 function showScreen(name){
  state.screen=name;
  $("consultScreen").hidden=name!=="consult";
  $("planScreen").hidden=name!=="plan";
  document.querySelectorAll("[data-screen]").forEach(b=>b.classList.toggle("active",b.dataset.screen===name));
+ if(name==="consult"){renderRelationSummary();}
  if(name==="plan"){renderPlanner();renderResults();renderSuggestions();}
  window.scrollTo({top:0,behavior:"smooth"});
 }
@@ -353,7 +424,7 @@ function renderSuggestions(){
 
 function renderPlanner(){
  const c=state.consultation,t=state.tasks[state.activeTask];
- $("profileSummary").textContent=c.grade?["小学"+c.grade+"年",c.sex,c.diagnosis].filter(Boolean).join(" · "):"学年未入力";
+ $("profileSummary").textContent=c.grade?["小学"+c.grade+"年",c.sex,c.diagnosis,relationshipSummaryText()].filter(Boolean).join(" · "):"学年未入力";
  [0,1].forEach(i=>{
   const tab=$("taskTab"+i),tt=state.tasks[i],tp=topic(tt.topic);
   tab.classList.toggle("active",i===state.activeTask);
@@ -377,7 +448,8 @@ function defaultPlan(tp,task,index){
  const longGoal=DOMAIN_GOALS[tp.domainId]||"本人の実態に合う方法を選び、学校生活で使えるようになる。";
  const short=override.short||`「${tp.name}」について、本人に合う手掛かりを使い、目標とする行動を一つ実行できる。`;
  const baseMethod=override.method||`「${tp.name}」を、具体的な場面・見本・選択肢を使って小さく練習する。`;
- const method=[baseMethod,"【つまずきの観点】"+stage.method,"【人的支援】"+support.method,"【本人との確認】"+wish.method].join("\n");
+ const relationNotes=relationshipGuidance();
+ const method=[baseMethod,"【つまずきの観点】"+stage.method,"【人的支援】"+support.method,"【本人との確認】"+wish.method,...relationNotes.map(x=>"【関係性を踏まえた調整】"+x)].join("\n");
  const context=task.context||consultationReality();
  const genericEvals=[
   "教師と一緒に、対象となる行動や方法を一つ選んだ。",
@@ -402,6 +474,7 @@ function materialScore(m,tp){
  if(direct)s+=1000;
  const priority=MATERIAL_PRIORITY[tp.id]?.[m.name]||0;
  s+=priority;
+ s+=relationMaterialAdjustment(m);
  if(direct&&m.status==="完成")s+=15;
  if(direct&&m.status==="制作中")s+=6;
  if(direct&&m.status==="活動案・未実践")s+=2;
@@ -419,6 +492,7 @@ function materialReason(m,tp){
  else if(m.status==="制作中")reasons.push("制作中");
  else if(m.status==="活動案・未実践")reasons.push("未実践");
  if(m.name.includes("1～3年")&&Number(state.consultation.grade)<=3)reasons.push("低学年向け");
+ reasons.push(...relationMaterialReason(m));
  return reasons.join("・")||"関連の確認が必要";
 }
 function candidateMaterials(tp,query="",directOnly=false){
@@ -482,6 +556,7 @@ function cardHtml(index){
     <div class="plan-field">具体的な手立て</div>
     <textarea class="plan-textarea" data-draft="method" data-task="${index}" rows="6">${esc(d.method)}</textarea>
     ${ready?`<div class="support-note">つまずき：${esc(STAGES[task.stage].name)} ／ 支援：${esc(SUPPORTS[task.support].name)} ／ 本人：${esc(WISHES[task.wish].name)}</div>`:'<div class="support-note">左側で「つまずき・支援量・本人の認識」まで選ぶと、手立てを調整します。</div>'}
+    <div class="relationship-note">関係性：${esc(relationshipSummaryText())}</div>
    </div>
    <div class="plan-block">${renderMaterials(index,tp)}</div>
    <div class="plan-block">
@@ -528,6 +603,7 @@ function loadLocal(){
  try{
   const saved=JSON.parse(raw);
   Object.assign(state,saved);
+  state.consultation={grade:"",sex:"",diagnosis:"",teacherRelation:"未確認",parentRelation:"未確認",studentConcern:"",studentVoice:"",schoolConcern:"",schoolVoice:"",homeConcern:"",homeVoice:"",...(saved.consultation||{})};
   syncInputsFromConsultation();
   showScreen(state.screen||"consult");
   $("saveMessage").textContent="保存記録を読み込みました。";
@@ -537,13 +613,13 @@ function clearAll(){
  if(!confirm("入力と選択内容を初期化しますか？"))return;
  localStorage.removeItem(STORAGE_KEY);
  state.screen="consult";state.activeTask=0;
- state.consultation={grade:"",sex:"",diagnosis:"",teacherRelation:"未確認",studentConcern:"",studentVoice:"",schoolConcern:"",schoolVoice:"",homeConcern:"",homeVoice:""};
+ state.consultation={grade:"",sex:"",diagnosis:"",teacherRelation:"未確認",parentRelation:"未確認",studentConcern:"",studentVoice:"",schoolConcern:"",schoolVoice:"",homeConcern:"",homeVoice:""};
  state.tasks=[emptyTask(),emptyTask()];state.drafts=[{},{}];state.selectedMaterials=[[],[]];
  syncInputsFromConsultation();showScreen("consult");
 }
 
 function demo(){
- state.consultation={grade:"2",sex:"男子",diagnosis:"ADHD",teacherRelation:"良好",studentConcern:"学習",studentVoice:"やることは分かるけど、途中で別のことが気になる。",schoolConcern:"行動",schoolVoice:"課題中に注意がそれやすく、思いつくとすぐ発言する。順番を待つのも難しいことがある。",homeConcern:"",homeVoice:""};
+ state.consultation={grade:"2",sex:"男子",diagnosis:"ADHD",teacherRelation:"良好",parentRelation:"未確認",studentConcern:"学習",studentVoice:"やることは分かるけど、途中で別のことが気になる。",schoolConcern:"行動",schoolVoice:"課題中に注意がそれやすく、思いつくとすぐ発言する。順番を待つのも難しいことがある。",homeConcern:"",homeVoice:""};
  state.tasks=[{domain:"D",topic:"T-D02",stage:"3",support:"2",wish:"2",context:"課題中に注意がそれやすい。短く区切ると取り組みやすい。"},{domain:"C",topic:"T-C01",stage:"3",support:"2",wish:"2",context:"思いつくとすぐ発言・行動する。短い合図があると止まれることがある。"}];
  state.drafts=[{},{}];state.selectedMaterials=[[],[]];
  syncInputsFromConsultation();showScreen("plan");
@@ -553,6 +629,8 @@ document.querySelectorAll("[data-screen]").forEach(b=>b.addEventListener("click"
 $("toPlan").addEventListener("click",()=>{syncConsultationFromInputs();if(!state.consultation.grade){alert("学年を選択してください。");return;}showScreen("plan");});
 $("backConsult").addEventListener("click",()=>showScreen("consult"));
 $("demoCase").addEventListener("click",demo);
+$("teacherRelation").addEventListener("change",()=>{syncConsultationFromInputs();renderRelationSummary();});
+$("parentRelation").addEventListener("change",()=>{syncConsultationFromInputs();renderRelationSummary();});
 $("taskTab0").addEventListener("click",()=>setActiveTask(0));$("taskTab1").addEventListener("click",()=>setActiveTask(1));
 $("domainSelect").addEventListener("change",e=>{const t=state.tasks[state.activeTask];t.domain=e.target.value;t.topic="";state.drafts[state.activeTask]={};state.selectedMaterials[state.activeTask]=[];renderPlanner();renderResults();});
 $("topicSelect").addEventListener("change",e=>{const t=state.tasks[state.activeTask];t.topic=e.target.value;state.drafts[state.activeTask]={};state.selectedMaterials[state.activeTask]=[];renderPlanner();renderResults();});
