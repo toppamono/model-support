@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="description" content="日本語の指示をAI向けの英語プロンプトに整えるツール。">
+<title>Prompt Bridge｜日本語からAIプロンプトへ</title>
+<style>
+:root{font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;color:#25324d;background:#f6f8fc;font-synthesis:none}
+*{box-sizing:border-box}body{margin:0}button,input,select,textarea{font:inherit}
+button{cursor:pointer;border:0}button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid #a4b5fc;outline-offset:2px}
+.shell{max-width:1380px;margin:auto;padding:0 34px}
+header{height:85px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e5eaf2;gap:12px}
+.brand{display:flex;align-items:center;gap:13px}.logo{background:#e8ecff;color:#415bc5;font-weight:900;padding:12px;border-radius:12px}.brand b{font-size:20px}.brand small{display:block;color:#7e889c;font-size:11px;margin-top:4px}.tag{font-size:10px;color:#5b69bc;background:#e6ebff;border-radius:20px;padding:7px 10px}
+h1{font-size:clamp(24px,3.3vw,35px);line-height:1.5;margin:38px 0 9px;letter-spacing:-1px}h1 em{font-style:normal;color:#5767cc}
+.lead{margin:0 0 28px;font-size:13px;line-height:1.85;color:#78839b}
+.toolbar{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;margin:0 0 15px;align-items:center}
+.modes{display:flex;background:#e9edf6;border-radius:12px;padding:4px;gap:3px}
+.mode{padding:10px 17px;border-radius:9px;background:transparent;color:#596980;font-weight:700;font-size:12px}
+.mode.on{background:white;color:#4c5fc6;box-shadow:0 2px 6px #0001}
+.option{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.option label{font-size:12px;color:#65708b;font-weight:700}
+select,.setting input{padding:10px;border:1px solid #d7ddea;border-radius:10px;background:white;color:#354360;font-size:13px}
+input[type=checkbox]{width:17px;height:17px;accent-color:#6171d6}
+.panes{display:grid;grid-template-columns:1fr 1fr;gap:17px}.pane{display:flex;flex-direction:column;background:white;border:1px solid #e1e7f0;border-radius:16px;box-shadow:0 5px 18px #1829540a;min-height:450px;overflow:hidden}
+.pane-header{display:flex;justify-content:space-between;align-items:center;padding:18px 19px;border-bottom:1px solid #edf0f6;gap:12px}
+.pane-title{display:flex;align-items:center;gap:9px;font-size:14px}.language{display:grid;place-items:center;border-radius:8px;width:32px;height:32px;background:#e9edff;color:#5369c7;font-size:12px;font-weight:900}
+.language.en{background:#ddf6ec;color:#158b68}.tools{display:flex;gap:7px;align-items:center}.ghost{background:transparent;color:#75819a;padding:7px;font-size:12px}
+.primary{background:#576bd1;color:white;border-radius:9px;font-weight:700;font-size:12px;padding:10px 14px}.primary:disabled{opacity:.45;cursor:not-allowed}
+textarea{width:100%;flex:1;resize:vertical;border:0;outline:0;padding:22px;min-height:335px;font-size:15px;line-height:1.9;color:#334361;background:white}
+textarea:focus-visible{outline:0}.pane-footer{border-top:1px solid #edf0f6;color:#94a0b1;font-size:11px;padding:12px 20px;display:flex;justify-content:space-between;gap:10px}
+.pending{background:#fff9e9;padding:10px 16px;font-size:12px;display:flex;gap:10px;justify-content:space-between;align-items:center;color:#8b6b30}
+.pending button{background:#af8645;color:white;border-radius:6px;padding:6px 12px;font-size:12px}
+.below{margin-top:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}#status{font-size:12px;color:#687991;line-height:1.6}#status.error{color:#b94749}
+.outline{background:white;color:#5366bb;border:1px solid #dce1ef;border-radius:9px;padding:10px 13px;font-size:12px;font-weight:700}
+.note{margin:28px 0;border:1px solid #e1e5f0;background:#fff;border-radius:12px;padding:15px 18px;font-size:12px;line-height:1.85;color:#6d7892}
+.note strong{color:#33415d}.note code{background:#f0f2f8;padding:2px 4px;border-radius:4px}
+footer{border-top:1px solid #e1e7ee;padding:20px 0 30px;font-size:11px;color:#9aa4b4}
+dialog{width:min(560px,calc(100vw - 30px));border:1px solid #dfe4ed;border-radius:16px;box-shadow:0 24px 80px #1c2b4e40;padding:24px;color:#34415a}
+dialog::backdrop{background:#1a275974}dialog h2{margin:0 0 12px;font-size:20px}dialog p{font-size:12px;line-height:1.85;color:#687992}
+.setting{display:grid;gap:6px;margin:14px 0}.setting label{font-size:12px;font-weight:700}.setting input{width:100%}
+.actions{display:flex;justify-content:flex-end;gap:10px;margin-top:22px}.warn{background:#fff7e7;border-radius:8px;padding:11px 12px}
+@media(max-width:800px){.shell{padding:0 15px}.panes{grid-template-columns:1fr}.pane{min-height:320px}textarea{min-height:240px}h1{margin-top:27px}.toolbar{align-items:flex-start}header{height:73px}.brand b{font-size:17px}}
+@media(max-width:440px){.mode{padding:9px 12px;font-size:11px}.pane-header{padding:13px 11px}.ghost{font-size:11px;padding:5px}textarea{padding:15px}.tag{font-size:9px}}
+</style>
+</head>
+<body>
+<div class="shell">
+<header><div class="brand"><span class="logo">あ → A</span><div><b>Prompt Bridge</b><small>日本語から、伝わる英語へ。</small></div></div><span class="tag">WEB PROTOTYPE</span></header>
+<main>
+<h1>思いついた言葉を、<br><em>そのままAIへの指示に。</em></h1>
+<p class="lead">逐語訳ではなく、姿勢・位置関係・維持条件を整理して英語プロンプトへ。入力からコピーまで、できるだけ少ない操作で。</p>
+<div class="toolbar">
+<div class="modes" role="group" aria-label="変換モード"><button class="mode on" data-mode="image">画像生成</button><button class="mode" data-mode="edit">画像編集</button><button class="mode" data-mode="general">汎用</button></div>
+<div class="option"><label for="provider">変換方式</label><select id="provider"><option value="demo">サンプル（例文のみ）</option><option value="gateway">AI中継サーバー</option></select><label><input type="checkbox" id="automatic" checked> 自動変換</label><button class="outline" id="settings">接続設定</button></div>
+</div>
+<div class="panes">
+<section class="pane"><div class="pane-header"><div class="pane-title"><span class="language">日</span><b>日本語で入力</b></div><div class="tools"><button class="ghost" id="example">例文を入れる</button><button class="ghost" id="clear">クリア</button></div></div><textarea id="jp" spellcheck="false" lang="ja" aria-label="日本語入力" placeholder="ここに日本語で指示を入力してください。&#10;例：人物の顔と服装は維持して、体を少し右へ移動。背景はそのまま。画面は16:9。"></textarea><div class="pane-footer"><span id="jpcount">0 文字</span><span>入力停止から約0.75秒後に変換</span></div></section>
+<section class="pane"><div class="pane-header"><div class="pane-title"><span class="language en">EN</span><b>English Prompt</b></div><div class="tools"><button class="ghost" id="undo">元に戻す</button><button class="primary" id="copy" disabled>コピー</button></div></div><textarea id="en" spellcheck="false" lang="en" aria-label="生成された英語（編集可能）" placeholder="最適化された英語がここに表示されます。&#10;生成された英文は直接編集できます。"></textarea><div class="pending" id="pending" hidden><span>手動編集した英語があります。新しい変換を反映しますか？</span><button id="apply">反映</button></div><div class="pane-footer"><span id="encount">0 文字</span><span id="editstate">編集できます</span></div></section>
+</div>
+<div class="below"><div id="status" role="status" aria-live="polite">デモ版は例文のみ変換します。自由入力はAI中継サーバーの設定が必要です。</div><button class="outline" id="convert">↻ 今すぐ変換</button></div>
+<div class="note"><strong>公開版の安全設計：</strong>GitHub Pagesは画面のみ公開します。OpenAI APIキーをこのページやGitHubに書き込まないでください。AI変換には別途、APIキーを安全に保持する中継サーバーが必要です。作業中の日本語と英語はこのブラウザ内に保存されます。学校・児童などの個人情報は入力しないでください。</div>
+</main>
+<footer>Prompt Bridge · GitHub Pages対応プロトタイプ · API接続がない場合はサンプル表示のみ</footer>
+</div>
+<dialog id="config"><h2>AI中継サーバーの設定</h2><p>自由な日本語をAI変換するには、別途Cloudflare Workerなどに中継サーバーを設置します。OpenAI APIキー自体は入力しません。</p>
+<div class="setting"><label for="endpoint">中継サーバー URL（HTTPS）</label><input id="endpoint" type="url" placeholder="https://xxxx.workers.dev"></div>
+<div class="setting"><label for="token">中継用アクセストークン</label><input id="token" type="password" autocomplete="off" placeholder="サーバー側に設定した専用トークン"></div>
+<p class="warn">アクセストークンはブラウザの保存領域へ記録しません。ページを開き直した場合は再入力してください。OpenAIのAPIキーをここに貼り付けないでください。</p>
+<div class="actions"><button class="outline" id="close">閉じる</button><button class="primary" id="save">設定して使う</button></div></dialog>
+<script>
+(function(){
+'use strict';
+const E=id=>document.getElementById(id),jp=E('jp'),en=E('en'),provider=E('provider'),auto=E('automatic');
+const EXAMPLE='体育倉庫のマットの上で、男性が手前、女性が後ろで対面座位で抱き合っている。画面サイズは16:9。';
+const PROMPTS={
+image:'A man and a woman sit facing each other on a gymnastics mat inside a gym equipment storage room, embracing one another. The man is positioned closer to the camera and the woman farther back. Keep their seated face-to-face orientation. Landscape composition, 16:9 aspect ratio.',
+edit:'Show a man and a woman embracing in a face-to-face seated position on a gymnastics mat in a gym equipment storage room. Position the man in the foreground and the woman behind him relative to the camera. Use a 16:9 landscape composition. Preserve any existing details not specified for modification.',
+general:'Create a 16:9 scene of a man and a woman sitting face-to-face while embracing on a gymnastics mat in a gym equipment storage room. The man is nearer the camera and the woman is farther back.'
+};
+const draftKey='prompt_bridge_web_draft_1',settingsKey='prompt_bridge_web_settings_1';
+let mode='image',manual=false,pending=null,undoText='',timer=null,request=0,controller=null,composing=false,endpoint='',accessToken='',lastSignature='';
+const dialog=E('config');
+function setStatus(v,error){E('status').textContent=v;E('status').className=error?'error':''}
+function saveDraft(){try{localStorage.setItem(draftKey,JSON.stringify({jp:jp.value,en:en.value,manual:manual}));localStorage.setItem(settingsKey,JSON.stringify({mode:mode,provider:provider.value,auto:auto.checked,endpoint:endpoint}));}catch(e){}}
+function counts(){E('jpcount').textContent=jp.value.length+' 文字';E('encount').textContent=en.value.length+' 文字';E('copy').disabled=!en.value.trim();E('editstate').textContent=pending?'新しい候補があります':manual?'手動編集を保護中':'編集できます'}
+function normalize(v){return v.replace(/[\s。、，,.!！]/g,'').replace(/１６/g,'16').replace(/：/g,':')}
+function signature(){return JSON.stringify([jp.value.trim(),mode,provider.value,endpoint]);}
+function cancel(){clearTimeout(timer);request++;if(controller)controller.abort();controller=null}
+function schedule(force){
+ cancel();
+ if(!jp.value.trim()){if(!manual)en.value='';pending=null;E('pending').hidden=true;counts();saveDraft();setStatus('日本語を入力してください。');return}
+ if(!force&&!auto.checked)return;
+ if(provider.value==='gateway'&&(!endpoint||!accessToken)){setStatus('中継サーバーのURLと専用トークンを設定してください。',true);return}
+ if(!force&&lastSignature===signature())return;
+ timer=setTimeout(convert,force?0:750);
+}
+async function convert(){
+ const seq=++request,sig=signature();controller=new AbortController();
+ setStatus(provider.value==='demo'?'サンプルを確認しています…':'AIがプロンプトを最適化しています…');
+ E('convert').disabled=true;
+ try{
+ let translated='';
+ if(provider.value==='demo'){
+  await new Promise(r=>setTimeout(r,150));
+  if(normalize(jp.value.trim())!==normalize(EXAMPLE))throw Error('サンプルは例文のみ対応します。自由入力はAI中継サーバーの設定が必要です。');
+  translated=PROMPTS[mode];
+ }else{
+  const url=endpoint.replace(/\/+$/,'')+'/api/convert';
+  const response=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+accessToken},body:JSON.stringify({japanese:jp.value.trim(),mode:mode}),signal:controller.signal});
+  const data=await response.json();
+  if(!response.ok)throw Error(data.error||'接続エラー ('+response.status+')');
+  translated=data.english;
+ }
+ if(seq!==request||sig!==signature())return;
+ if(typeof translated!=='string'||!translated.trim())throw Error('変換結果が空でした。');
+ lastSignature=sig;
+ if(manual){pending=translated;E('pending').hidden=false;setStatus('新しい候補があります。手動編集した英語は保持しています。')}
+ else{undoText=en.value;en.value=translated;pending=null;E('pending').hidden=true;setStatus('変換しました。英語は編集・コピーできます。')}
+ counts();saveDraft();
+ }catch(error){if(seq===request&&error.name!=='AbortError')setStatus(error.message||'変換に失敗しました。',true)}
+ finally{if(seq===request){controller=null;E('convert').disabled=false}}
+}
+function edit(){counts();saveDraft();if(!composing)schedule(false)}
+try{const d=JSON.parse(localStorage.getItem(draftKey)||'{}'),s=JSON.parse(localStorage.getItem(settingsKey)||'{}');jp.value=d.jp||'';en.value=d.en||'';manual=!!d.manual;mode=['image','edit','general'].includes(s.mode)?s.mode:'image';provider.value=s.provider==='gateway'?'gateway':'demo';auto.checked=s.auto!==false;endpoint=typeof s.endpoint==='string'?s.endpoint:'';}catch(e){}
+document.querySelectorAll('.mode').forEach(b=>{b.classList.toggle('on',b.dataset.mode===mode);b.addEventListener('click',()=>{mode=b.dataset.mode;document.querySelectorAll('.mode').forEach(x=>x.classList.toggle('on',x===b));lastSignature='';saveDraft();schedule(false)})});
+jp.addEventListener('compositionstart',()=>{composing=true;cancel()});jp.addEventListener('compositionend',()=>{composing=false;edit()});jp.addEventListener('input',edit);
+en.addEventListener('input',()=>{manual=true;counts();saveDraft()});
+provider.addEventListener('change',()=>{lastSignature='';saveDraft();schedule(false);if(provider.value==='gateway'&&!accessToken)dialog.showModal()});
+auto.addEventListener('change',()=>{saveDraft();schedule(false)});
+E('example').onclick=()=>{jp.value=EXAMPLE;edit();jp.focus()};
+E('clear').onclick=()=>{cancel();jp.value='';en.value='';manual=false;pending=null;lastSignature='';E('pending').hidden=true;counts();saveDraft();setStatus('クリアしました。')};
+E('apply').onclick=()=>{if(pending!==null){undoText=en.value;en.value=pending;manual=false;pending=null;E('pending').hidden=true;counts();saveDraft();setStatus('新しい英語を反映しました。')}};
+E('undo').onclick=()=>{if(!undoText)return;const t=en.value;en.value=undoText;undoText=t;manual=true;counts();saveDraft();setStatus('直前の英文に戻しました。')};
+E('convert').onclick=()=>schedule(true);
+E('copy').onclick=async()=>{try{await navigator.clipboard.writeText(en.value);setStatus('英語プロンプトをコピーしました。')}catch(e){en.focus();en.select();setStatus('英語を選択しました。手動でコピーしてください。',true)}};
+E('settings').onclick=()=>{E('endpoint').value=endpoint;E('token').value=accessToken;dialog.showModal()};
+E('close').onclick=()=>dialog.close();
+E('save').onclick=()=>{
+ const url=E('endpoint').value.trim().replace(/\/+$/,''),tok=E('token').value.trim();
+ if(url&&!/^https:\/\/[^\s]+$/.test(url)){setStatus('中継サーバーにはHTTPSのURLを指定してください。',true);return}
+ endpoint=url;accessToken=tok;provider.value='gateway';lastSignature='';saveDraft();dialog.close();schedule(false);
+};
+counts();if(jp.value&&provider.value==='demo'&&auto.checked)schedule(false);
+})();
+</script>
+</body></html>
