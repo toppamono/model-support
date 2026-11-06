@@ -182,7 +182,7 @@ async function convert(forceUpdate=false){
  finally{if(seq===request){controller=null;E('convert').disabled=false}}
 }
 function edit(){counts();saveDraft();if(!composing)schedule(false)}
-try{const d=JSON.parse(localStorage.getItem(draftKey)||'{}'),s=JSON.parse(localStorage.getItem(settingsKey)||'{}');jp.value=d.jp||'';en.value=d.en||'';manual=!!d.manual;mode=['image','edit','general'].includes(s.mode)?s.mode:'image';provider.value=s.provider==='gateway'?'gateway':'offline';auto.checked=s.auto!==false;endpoint=typeof s.endpoint==='string'?s.endpoint:'';}catch(e){}
+try{const d=JSON.parse(localStorage.getItem(draftKey)||'{}'),s=JSON.parse(localStorage.getItem(settingsKey)||'{}');jp.value=d.jp||'';en.value=d.en||'';manual=!!d.manual;mode=['image','edit','general'].includes(s.mode)?s.mode:'image';provider.value='offline';auto.checked=s.auto!==false;endpoint=typeof s.endpoint==='string'?s.endpoint:'';}catch(e){}
 document.querySelectorAll('.mode').forEach(b=>{b.classList.toggle('on',b.dataset.mode===mode);b.addEventListener('click',()=>{mode=b.dataset.mode;document.querySelectorAll('.mode').forEach(x=>x.classList.toggle('on',x===b));lastSignature='';saveDraft();schedule(false)})});
 jp.addEventListener('compositionstart',()=>{composing=true;cancel()});jp.addEventListener('compositionend',()=>{composing=false;edit()});jp.addEventListener('input',edit);
 en.addEventListener('input',()=>{manual=true;counts();saveDraft()});
