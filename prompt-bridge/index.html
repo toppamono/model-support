@@ -97,10 +97,10 @@ function offlineConvert(raw,selectedMode){
  else if(has(/公園/))scene.push('in a park');
  if(mat)scene.push('on a gym mat');
  const spatial=[];
- if(has(/男性.{0,12}手前|手前.{0,12}男性|男性.{0,12}前景/))spatial.push('The man is positioned closer to the camera');
- if(has(/女性.{0,12}手前|手前.{0,12}女性|女性.{0,12}前景/))spatial.push('The woman is positioned closer to the camera');
- if(has(/女性.{0,12}(後ろ|奥)|女性.{0,12}背景側/))spatial.push('the woman is farther from the camera');
- if(has(/男性.{0,12}(後ろ|奥)|男性.{0,12}背景側/))spatial.push('the man is farther from the camera');
+ if(has(/(?:男性|男の人)[^、。女性]{0,8}(?:手前|前景)/))spatial.push('The man is positioned closer to the camera');
+ if(has(/(?:女性|女の人)[^、。男性]{0,8}(?:手前|前景)/))spatial.push('The woman is positioned closer to the camera');
+ if(has(/(?:女性|女の人)[^、。男性]{0,8}(?:後ろ|奥|背景側)/))spatial.push('the woman is farther from the camera');
+ if(has(/(?:男性|男の人)[^、。女性]{0,8}(?:後ろ|奥|背景側)/))spatial.push('the man is farther from the camera');
  if(pair&&(faceToFace||embrace)){
   const action=faceToFace&&embrace?'sitting face-to-face and embracing each other':faceToFace?'sitting face-to-face':'embracing each other';
   const where=scene.length?' '+scene.join(' '):'';
@@ -155,9 +155,9 @@ function schedule(force){
  if(!force&&!auto.checked)return;
  if(provider.value==='gateway'&&(!endpoint||!accessToken)){setStatus('中継サーバーのURLと専用トークンを設定してください。',true);return}
  if(!force&&lastSignature===signature())return;
- timer=setTimeout(convert,force?0:750);
+ timer=setTimeout(()=>convert(!!force),force?0:750);
 }
-async function convert(){
+async function convert(forceUpdate=false){
  const seq=++request,sig=signature();controller=new AbortController();
  setStatus(provider.value==='offline'?'対応表現を簡易変換しています…':'AIがプロンプトを最適化しています…');
  E('convert').disabled=true;
@@ -175,8 +175,8 @@ async function convert(){
  if(seq!==request||sig!==signature())return;
  if(typeof translated!=='string'||!translated.trim())throw Error('変換結果が空でした。');
  lastSignature=sig;
- if(manual){pending=translated;E('pending').hidden=false;setStatus('新しい候補があります。手動編集した英語は保持しています。')}
- else{undoText=en.value;en.value=translated;pending=null;E('pending').hidden=true;setStatus(provider.value==='offline'?'簡易変換しました。未対応の語句が省略される場合があります。内容を確認してください。':'AIで変換しました。英語は編集・コピーできます。')}
+ if(manual&&!forceUpdate){pending=translated;E('pending').hidden=false;setStatus('新しい候補があります。手動編集した英語は保持しています。')}
+ else{undoText=en.value;en.value=translated;manual=false;pending=null;E('pending').hidden=true;setStatus(provider.value==='offline'?'簡易変換しました。未対応の語句が省略される場合があります。内容を確認してください。':'AIで変換しました。英語は編集・コピーできます。')}
  counts();saveDraft();
  }catch(error){if(seq===request&&error.name!=='AbortError')setStatus(error.message||'変換に失敗しました。',true)}
  finally{if(seq===request){controller=null;E('convert').disabled=false}}
