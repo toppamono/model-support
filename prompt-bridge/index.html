@@ -22,7 +22,7 @@ h1{font-size:clamp(24px,3.3vw,35px);line-height:1.5;margin:38px 0 9px;letter-spa
 .option{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.option label{font-size:12px;color:#65708b;font-weight:700}
 select,.setting input{padding:10px;border:1px solid #d7ddea;border-radius:10px;background:white;color:#354360;font-size:13px}
 input[type=checkbox]{width:17px;height:17px;accent-color:#6171d6}
-.panes{display:grid;grid-template-columns:1fr 1fr;gap:17px}.pane{display:flex;flex-direction:column;background:white;border:1px solid #e1e7f0;border-radius:16px;box-shadow:0 5px 18px #1829540a;min-height:450px;overflow:hidden}
+.panes{display:grid;grid-template-columns:minmax(0,1fr) 78px minmax(0,1fr);gap:10px}.bridge{display:flex;align-items:center;justify-content:center}.convert-button{width:72px;min-height:78px;background:#576bd1;color:white;border-radius:13px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-weight:800;font-size:12px;box-shadow:0 5px 15px #4f64b333}.convert-button:hover{background:#485dbf}.convert-button .arrow{font-size:29px;line-height:1}.convert-button:disabled{opacity:.55;cursor:wait}.pane{display:flex;flex-direction:column;background:white;border:1px solid #e1e7f0;border-radius:16px;box-shadow:0 5px 18px #1829540a;min-height:450px;overflow:hidden}
 .pane-header{display:flex;justify-content:space-between;align-items:center;padding:18px 19px;border-bottom:1px solid #edf0f6;gap:12px}
 .pane-title{display:flex;align-items:center;gap:9px;font-size:14px}.language{display:grid;place-items:center;border-radius:8px;width:32px;height:32px;background:#e9edff;color:#5369c7;font-size:12px;font-weight:900}
 .language.en{background:#ddf6ec;color:#158b68}.tools{display:flex;gap:7px;align-items:center}.ghost{background:transparent;color:#75819a;padding:7px;font-size:12px}
@@ -40,7 +40,7 @@ dialog{width:min(560px,calc(100vw - 30px));border:1px solid #dfe4ed;border-radiu
 dialog::backdrop{background:#1a275974}dialog h2{margin:0 0 12px;font-size:20px}dialog p{font-size:12px;line-height:1.85;color:#687992}
 .setting{display:grid;gap:6px;margin:14px 0}.setting label{font-size:12px;font-weight:700}.setting input{width:100%}
 .actions{display:flex;justify-content:flex-end;gap:10px;margin-top:22px}.warn{background:#fff7e7;border-radius:8px;padding:11px 12px}
-@media(max-width:800px){.shell{padding:0 15px}.panes{grid-template-columns:1fr}.pane{min-height:320px}textarea{min-height:240px}h1{margin-top:27px}.toolbar{align-items:flex-start}header{height:73px}.brand b{font-size:17px}}
+@media(max-width:800px){.shell{padding:0 15px}.panes{grid-template-columns:1fr}.bridge{min-height:70px}.convert-button{flex-direction:row;gap:13px;width:200px;min-height:50px}.convert-button .arrow{font-size:23px;transform:rotate(90deg)}.pane{min-height:320px}textarea{min-height:240px}h1{margin-top:27px}.toolbar{align-items:flex-start}header{height:73px}.brand b{font-size:17px}}
 @media(max-width:440px){.mode{padding:9px 12px;font-size:11px}.pane-header{padding:13px 11px}.ghost{font-size:11px;padding:5px}textarea{padding:15px}.tag{font-size:9px}}
 </style>
 </head>
@@ -52,16 +52,17 @@ dialog::backdrop{background:#1a275974}dialog h2{margin:0 0 12px;font-size:20px}d
 <p class="lead">逐語訳ではなく、姿勢・位置関係・維持条件を整理して英語プロンプトへ。入力からコピーまで、できるだけ少ない操作で。</p>
 <div class="toolbar">
 <div class="modes" role="group" aria-label="変換モード"><button class="mode on" data-mode="image">画像生成</button><button class="mode" data-mode="edit">画像編集</button><button class="mode" data-mode="general">汎用</button></div>
-<div class="option"><label for="provider">変換方式</label><select id="provider"><option value="demo">サンプル（例文のみ）</option><option value="gateway">AI中継サーバー</option></select><label><input type="checkbox" id="automatic" checked> 自動変換</label><button class="outline" id="settings">接続設定</button></div>
+<div class="option"><label for="provider">変換方式</label><select id="provider"><option value="offline">簡易変換（接続不要）</option><option value="gateway">AI中継サーバー</option></select><label><input type="checkbox" id="automatic" checked> 自動変換</label><button class="outline" id="settings">接続設定</button></div>
 </div>
 <div class="panes">
 <section class="pane"><div class="pane-header"><div class="pane-title"><span class="language">日</span><b>日本語で入力</b></div><div class="tools"><button class="ghost" id="example">例文を入れる</button><button class="ghost" id="clear">クリア</button></div></div><textarea id="jp" spellcheck="false" lang="ja" aria-label="日本語入力" placeholder="ここに日本語で指示を入力してください。&#10;例：人物の顔と服装は維持して、体を少し右へ移動。背景はそのまま。画面は16:9。"></textarea><div class="pane-footer"><span id="jpcount">0 文字</span><span>入力停止から約0.75秒後に変換</span></div></section>
+<div class="bridge"><button class="convert-button" id="convert" type="button" aria-label="日本語から英語へ変換"><span class="arrow" aria-hidden="true">➜</span><span>変換</span></button></div>
 <section class="pane"><div class="pane-header"><div class="pane-title"><span class="language en">EN</span><b>English Prompt</b></div><div class="tools"><button class="ghost" id="undo">元に戻す</button><button class="primary" id="copy" disabled>コピー</button></div></div><textarea id="en" spellcheck="false" lang="en" aria-label="生成された英語（編集可能）" placeholder="最適化された英語がここに表示されます。&#10;生成された英文は直接編集できます。"></textarea><div class="pending" id="pending" hidden><span>手動編集した英語があります。新しい変換を反映しますか？</span><button id="apply">反映</button></div><div class="pane-footer"><span id="encount">0 文字</span><span id="editstate">編集できます</span></div></section>
 </div>
-<div class="below"><div id="status" role="status" aria-live="polite">デモ版は例文のみ変換します。自由入力はAI中継サーバーの設定が必要です。</div><button class="outline" id="convert">↻ 今すぐ変換</button></div>
+<div class="below"><div id="status" role="status" aria-live="polite">接続なしの簡易変換が使えます。自由文の高精度な変換にはAI接続が必要です。</div></div>
 <div class="note"><strong>公開版の安全設計：</strong>GitHub Pagesは画面のみ公開します。OpenAI APIキーをこのページやGitHubに書き込まないでください。AI変換には別途、APIキーを安全に保持する中継サーバーが必要です。作業中の日本語と英語はこのブラウザ内に保存されます。学校・児童などの個人情報は入力しないでください。</div>
 </main>
-<footer>Prompt Bridge · GitHub Pages対応プロトタイプ · API接続がない場合はサンプル表示のみ</footer>
+<footer>Prompt Bridge · GitHub Pages対応プロトタイプ · AI未接続時は一部の表現に対応した簡易変換</footer>
 </div>
 <dialog id="config"><h2>AI中継サーバーの設定</h2><p>自由な日本語をAI変換するには、別途Cloudflare Workerなどに中継サーバーを設置します。OpenAI APIキー自体は入力しません。</p>
 <div class="setting"><label for="endpoint">中継サーバー URL（HTTPS）</label><input id="endpoint" type="url" placeholder="https://xxxx.workers.dev"></div>
@@ -78,6 +79,67 @@ image:'A man and a woman sit facing each other on a gymnastics mat inside a gym 
 edit:'Show a man and a woman embracing in a face-to-face seated position on a gymnastics mat in a gym equipment storage room. Position the man in the foreground and the woman behind him relative to the camera. Use a 16:9 landscape composition. Preserve any existing details not specified for modification.',
 general:'Create a 16:9 scene of a man and a woman sitting face-to-face while embracing on a gymnastics mat in a gym equipment storage room. The man is nearer the camera and the woman is farther back.'
 };
+function offlineConvert(raw,selectedMode){
+ const t=raw.normalize('NFKC').replace(/[　]/g,' ').trim();
+ const hits=[];
+ const add=(txt)=>{if(txt&&!hits.includes(txt))hits.push(txt)};
+ const has=(p)=>p.test(t);
+ const pair=has(/男性.{0,35}女性|女性.{0,35}男性|男女|男の人.{0,35}女の人|女の人.{0,35}男の人/);
+ const subject=pair?'the man and the woman':has(/男性|男の人/)?'the man':has(/女性|女の人/)?'the woman':has(/人物|被写体|人の体|人を|人が|人は/)?'the person':null;
+ const storeroom=has(/体育倉庫|体育用具(?:の)?倉庫|体育器具庫|運動用具倉庫/);
+ const mat=has(/マット/);
+ const faceToFace=has(/対面座位|向かい合って座|向き合って座|向かい合うように座/);
+ const embrace=has(/抱き合|抱きしめ合|抱擁/);
+ const scene=[];
+ if(storeroom)scene.push('inside a gym equipment storage room');
+ else if(has(/体育館/))scene.push('inside a gymnasium');
+ else if(has(/教室/))scene.push('in a classroom');
+ else if(has(/公園/))scene.push('in a park');
+ if(mat)scene.push('on a gym mat');
+ const spatial=[];
+ if(has(/男性.{0,12}手前|手前.{0,12}男性|男性.{0,12}前景/))spatial.push('The man is positioned closer to the camera');
+ if(has(/女性.{0,12}手前|手前.{0,12}女性|女性.{0,12}前景/))spatial.push('The woman is positioned closer to the camera');
+ if(has(/女性.{0,12}(後ろ|奥)|女性.{0,12}背景側/))spatial.push('the woman is farther from the camera');
+ if(has(/男性.{0,12}(後ろ|奥)|男性.{0,12}背景側/))spatial.push('the man is farther from the camera');
+ if(pair&&(faceToFace||embrace)){
+  const action=faceToFace&&embrace?'sitting face-to-face and embracing each other':faceToFace?'sitting face-to-face':'embracing each other';
+  const where=scene.length?' '+scene.join(' '):'';
+  add('A man and a woman are '+action+where+'.');
+ }else if(scene.length&&subject){
+  add('Place '+subject+' '+scene.join(' ')+'.');
+ }else if(scene.length){add('Scene: '+scene.join(' ')+'.');}
+ if(spatial.length){
+  if(spatial.length===2)add(spatial[0]+'; '+spatial[1]+'.');
+  else for(const p of spatial)add(p+'.');
+ }
+ if(!pair&&faceToFace)add('The people are seated facing each other.');
+ if(!pair&&embrace)add('The people are embracing each other.');
+ // Independent edit actions, expressed without inventing subject details.
+ const right=has(/右(?:側)?(?:に|へ|方向へ)?.{0,8}(移動|動か|ずら|寄せ)/);
+ const left=has(/左(?:側)?(?:に|へ|方向へ)?.{0,8}(移動|動か|ずら|寄せ)/);
+ const moveSubject=subject||'the subject';
+ if(right)add('Move '+moveSubject+' slightly to the right within the image.');
+ if(left)add('Move '+moveSubject+' slightly to the left within the image.');
+ if(has(/(?:大きく|拡大|サイズを上げ|サイズを大きく)/)&&has(/人物|被写体|人の大きさ/))add('Increase the size of the subject within the frame without changing their body proportions.');
+ if(has(/(?:小さく|縮小|サイズを下げ|サイズを小さく)/)&&has(/人物|被写体|人の大きさ/))add('Make the subject occupy less of the image without changing their body proportions.');
+ const preserve=has(/変えず|変えない|変更しない|そのまま|維持|保持|変化させない|修正しない/);
+ if(preserve){
+  if(has(/顔|顔立ち|顔の特徴|顔つき/))add('Preserve the original facial features.');
+  if(has(/表情/))add('Preserve the original facial expression.');
+  if(has(/服装|衣装|洋服|服/))add('Keep the clothing unchanged.');
+  if(has(/髪型|髪/))add('Keep the hairstyle unchanged.');
+  if(has(/背景/))add('Keep the background unchanged.');
+  if(has(/構図/))add('Keep the original composition.');
+ }
+ if(selectedMode==='edit'&&has(/他はそのまま|他は変えない|その他は変更しない|それ以外は変えない|指定した箇所以外/))add('Leave all other image details unchanged.');
+ const aspect=t.match(/(?:画面サイズ|アスペクト比|縦横比|比率|画面は)?[^\d]{0,4}(\d{1,2})\s*[:：]\s*(\d{1,2})/);
+ if(aspect){
+  const a=+aspect[1],b=+aspect[2];
+  if(a>0&&b>0)add('Aspect ratio: '+a+':'+b+'.');
+ }
+ if(!hits.length)throw Error('この文章は簡易変換の対応範囲外です。自由な日本語を高精度で変換するにはAI中継サーバーを設定してください。');
+ return hits.join(' ');
+}
 const draftKey='prompt_bridge_web_draft_1',settingsKey='prompt_bridge_web_settings_1';
 let mode='image',manual=false,pending=null,undoText='',timer=null,request=0,controller=null,composing=false,endpoint='',accessToken='',lastSignature='';
 const dialog=E('config');
@@ -97,14 +159,12 @@ function schedule(force){
 }
 async function convert(){
  const seq=++request,sig=signature();controller=new AbortController();
- setStatus(provider.value==='demo'?'サンプルを確認しています…':'AIがプロンプトを最適化しています…');
+ setStatus(provider.value==='offline'?'対応表現を簡易変換しています…':'AIがプロンプトを最適化しています…');
  E('convert').disabled=true;
  try{
  let translated='';
- if(provider.value==='demo'){
-  await new Promise(r=>setTimeout(r,150));
-  if(normalize(jp.value.trim())!==normalize(EXAMPLE))throw Error('サンプルは例文のみ対応します。自由入力はAI中継サーバーの設定が必要です。');
-  translated=PROMPTS[mode];
+ if(provider.value==='offline'){
+  translated=offlineConvert(jp.value.trim(),mode);
  }else{
   const url=endpoint.replace(/\/+$/,'')+'/api/convert';
   const response=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+accessToken},body:JSON.stringify({japanese:jp.value.trim(),mode:mode}),signal:controller.signal});
@@ -116,13 +176,13 @@ async function convert(){
  if(typeof translated!=='string'||!translated.trim())throw Error('変換結果が空でした。');
  lastSignature=sig;
  if(manual){pending=translated;E('pending').hidden=false;setStatus('新しい候補があります。手動編集した英語は保持しています。')}
- else{undoText=en.value;en.value=translated;pending=null;E('pending').hidden=true;setStatus('変換しました。英語は編集・コピーできます。')}
+ else{undoText=en.value;en.value=translated;pending=null;E('pending').hidden=true;setStatus(provider.value==='offline'?'簡易変換しました。未対応の語句が省略される場合があります。内容を確認してください。':'AIで変換しました。英語は編集・コピーできます。')}
  counts();saveDraft();
  }catch(error){if(seq===request&&error.name!=='AbortError')setStatus(error.message||'変換に失敗しました。',true)}
  finally{if(seq===request){controller=null;E('convert').disabled=false}}
 }
 function edit(){counts();saveDraft();if(!composing)schedule(false)}
-try{const d=JSON.parse(localStorage.getItem(draftKey)||'{}'),s=JSON.parse(localStorage.getItem(settingsKey)||'{}');jp.value=d.jp||'';en.value=d.en||'';manual=!!d.manual;mode=['image','edit','general'].includes(s.mode)?s.mode:'image';provider.value=s.provider==='gateway'?'gateway':'demo';auto.checked=s.auto!==false;endpoint=typeof s.endpoint==='string'?s.endpoint:'';}catch(e){}
+try{const d=JSON.parse(localStorage.getItem(draftKey)||'{}'),s=JSON.parse(localStorage.getItem(settingsKey)||'{}');jp.value=d.jp||'';en.value=d.en||'';manual=!!d.manual;mode=['image','edit','general'].includes(s.mode)?s.mode:'image';provider.value=s.provider==='gateway'?'gateway':'offline';auto.checked=s.auto!==false;endpoint=typeof s.endpoint==='string'?s.endpoint:'';}catch(e){}
 document.querySelectorAll('.mode').forEach(b=>{b.classList.toggle('on',b.dataset.mode===mode);b.addEventListener('click',()=>{mode=b.dataset.mode;document.querySelectorAll('.mode').forEach(x=>x.classList.toggle('on',x===b));lastSignature='';saveDraft();schedule(false)})});
 jp.addEventListener('compositionstart',()=>{composing=true;cancel()});jp.addEventListener('compositionend',()=>{composing=false;edit()});jp.addEventListener('input',edit);
 en.addEventListener('input',()=>{manual=true;counts();saveDraft()});
@@ -141,7 +201,7 @@ E('save').onclick=()=>{
  if(url&&!/^https:\/\/[^\s]+$/.test(url)){setStatus('中継サーバーにはHTTPSのURLを指定してください。',true);return}
  endpoint=url;accessToken=tok;provider.value='gateway';lastSignature='';saveDraft();dialog.close();schedule(false);
 };
-counts();if(jp.value&&provider.value==='demo'&&auto.checked)schedule(false);
+counts();if(jp.value&&provider.value==='offline'&&auto.checked)schedule(false);
 })();
 </script>
 </body></html>
